@@ -1,22 +1,17 @@
-package cn.edu.sjtu.acemap.indexer;
+package cn.edu.sjtu.devinz.indexer;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 
-
-class PostReader extends PostIO {
+public class PostReader extends PostIO {
 	
-	private final QueryInfo queryInfo;
+	public final String term;
 	
-	public PostReader(int postPos, QueryInfo queryInfo) throws IOException {
-		super(postPos, false);
-		if (null != queryInfo) {
-			this.queryInfo = queryInfo;
-		} else {
-			throw new NullPointerException("queryInfo == null");
-		}
+	public PostReader(String term, int postPos, int zoneCode) throws IOException {
+		super(postPos, zoneCode, false);
+		this.term = term;
 	}
 	
 	public Posting nextPosting() throws IOException {
@@ -24,17 +19,10 @@ class PostReader extends PostIO {
 		if (!beyondEnd()) {
 			String docURL = nextString();
 			int numOfPoses = nextInt();
-			post = new Posting(queryInfo.term, field, docURL, 
+			post = new Posting(term, docURL, Zones.encode(zone),
 					new ArrayList<Integer>(numOfPoses));
 			for (int i=0; i<numOfPoses; i++) {
-				int pos = nextInt();
-				if (pos < queryInfo.getMinPos()) {
-					continue;
-				} else if (pos > queryInfo.getMaxPos()) {
-					break;
-				} else {
-					post.addPos(pos);
-				}
+				post.poses.add(nextInt());
 			}
 		}
 		return post;
@@ -44,21 +32,20 @@ class PostReader extends PostIO {
 		java.util.Random rand = new java.util.Random();
 		String term = "term";
 		String docURL = "docURL";
-		TermInfo termInfo = new TermInfo(term);
-		for (int time=0; time<1000000; time++) {
+		TermInfo termInfo = new TermInfo(term, 0, 1);
+		for (int time=0; time<100000; time++) {
 			System.out.println("time = "+time);
 			List<Integer> poses = new ArrayList<Integer>();
 			for (int i=0; i<5; i++) {
 				poses.add(rand.nextInt(100));
 			}
 			Posting post = new Posting(term,
-					Field.decode(rand.nextInt(Field.NUM_OF_FIELDS)), docURL, poses);
+					docURL, rand.nextInt(Zones.NUM_OF_ZONES), poses);
 			PostWriter.writePost(post, termInfo);
 		}
-		QueryInfo query = new QueryInfo("term", null);
 		int cnt = 0;
 		for (Integer postPos : termInfo.postPoses) {
-			PostReader reader = new PostReader(postPos, query);
+			PostReader reader = new PostReader(termInfo.value, postPos, 0);
 			try {
 				Posting post = reader.nextPosting();
 				while (null != post) {
@@ -69,7 +56,6 @@ class PostReader extends PostIO {
 				reader.close();
 			}
 		}
-		
 	}
 	
 }

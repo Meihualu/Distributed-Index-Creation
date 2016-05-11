@@ -1,4 +1,4 @@
-package cn.edu.sjtu.acemap.indexer;
+package cn.edu.sjtu.devinz.indexer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,8 +12,8 @@ class PostWriter extends PostIO {
 
 	private final String term;
 	
-	private PostWriter(String term, int postPos) throws IOException {
-		super(postPos, true);
+	private PostWriter(String term, int postPos, int zoneCode) throws IOException {
+		super(postPos, zoneCode, true);
 		this.term = term;
 	}
 	
@@ -24,10 +24,10 @@ class PostWriter extends PostIO {
 			try {
 				String docURL = nextString();
 				int numOfPoses = nextInt();
-				Posting post = new Posting(term, field, docURL, 
+				Posting post = new Posting(term, docURL, Zones.encode(zone),
 						new ArrayList<Integer>(numOfPoses));
 				for (int i=0; i<numOfPoses; i++) {
-					post.addPos(nextInt());
+					post.poses.add(nextInt());
 				}
 				return post;
 			} catch (IOException e) {
@@ -40,19 +40,17 @@ class PostWriter extends PostIO {
 		}
 	}
 	
-	/**
-	 * Write a Posting to the inverted files, and at the same time
-	 * 		update the state of the TermInfo
-	 */
+	/** Write a Posting to the inverted files, add to TermDict if needed */
+	
 	public static void writePost(Posting post, TermInfo termInfo) throws IOException {
-		List<Integer> postPoses = termInfo.getPostPoses(post.field);
+		Local.log("PostWriter.log", "writePost:\t"+post);
 		List<PostWriter> writers = new ArrayList<PostWriter>(16);
-		int space = Posting.SIZE_LEN+post.getSize();
-		for (int i=0; i<postPoses.size(); i++) {
-			PostWriter writer = new PostWriter(post.term, postPoses.get(i));
-			if (space+writer.getSlotSize()-Posting.SIZE_LEN >= writer.slotVol) {
+		int space = PostPoses.SIZE_LEN+post.lenOfBytes();
+		for (int i=0; i<termInfo.postPoses.size(); i++) {
+			PostWriter writer = new PostWriter(post.term, termInfo.postPoses.get(i), post.zoneCode);
+			if (space+writer.getSlotSize()-PostPoses.SIZE_LEN >= writer.slotVol) {
 				writers.add(writer);
-				space += writer.getSlotSize()-Posting.SIZE_LEN;
+				space += writer.getSlotSize()-PostPoses.SIZE_LEN;
 			} else {
 				try {
 					merge(writer, writers, post);
@@ -62,10 +60,18 @@ class PostWriter extends PostIO {
 				break;
 			}
 		}
-		if (writers.size() == postPoses.size()) {
-			int postPos = newPostPos(post.field, postPoses.size());
+		if (writers.size() == termInfo.postPoses.size()) {
+			int postPos = newPostPos(post.zoneCode, writers.size());
 			termInfo.addPostPos(postPos);	/* modify termInfo */
-			PostWriter writer = new PostWriter(termInfo.value, postPos);
+			PostWriter writer = new PostWriter(termInfo.value, postPos, post.zoneCode);
+			while (space >= writer.slotVol) {
+				writer.allocate();
+				writer.jumpToEnd();
+				writers.add(writer);
+				postPos = newPostPos(post.zoneCode, writers.size());
+				termInfo.addPostPos(postPos);
+				writer = new PostWriter(termInfo.value, postPos, post.zoneCode);
+			}
 			try {
 				writer.allocate();	/* allocate slot space first */
 				merge(writer, writers, post);
@@ -79,7 +85,6 @@ class PostWriter extends PostIO {
 				writer.close();
 			}
 		}
-		termInfo.numOfDoc++;	/* modify termInfo */
 	}
 	
 	private static void merge(PostWriter to, List<PostWriter> from, Posting post) 
@@ -101,7 +106,7 @@ class PostWriter extends PostIO {
 				}
 			}
 			if (i >= 0) {
-				int size = heads[i].getSize();
+				int size = heads[i].lenOfBytes();
 				space += size;
 				to.write(heads[i].toBytes(size));
 				if (i < from.size()) {
@@ -116,31 +121,31 @@ class PostWriter extends PostIO {
 		to.writeSlotSize(space);
 	}
 	
-	private static int newPostPos(String field, int partNO) 
+	private static int newPostPos(int zoneCode, int partNO) 
 			throws FileNotFoundException, IOException {
 		
-		String fileName = "/home/hadoop/index/"+partNO+"."+field;
+		String fileName = "/home/hadoop/.devin/index/"+partNO+"."+Zones.decode(zoneCode);
 		File file = new File(fileName);
 		if (!file.exists()) {
 			new FileOutputStream(fileName).close();
 		}
-		if (0 != file.length()%Posting.getSlotVolume(partNO)) {
+		if (0 != file.length()%PostPoses.getSlotVolume(partNO)) {
 			throw new RuntimeException("0 != file.length()%Posting.getSlotVolume(partNO)");
 		} else {
-			return Posting.encode(fileName, 
-					(int)(file.length()/Posting.getSlotVolume(partNO)));
+			return PostPoses.encode(fileName, 
+					(int)(file.length()/PostPoses.getSlotVolume(partNO)));
 		}
 	}
 	
 	private void clearSlot() throws IOException {
-		writeSlotSize(Posting.SIZE_LEN);
-		write(new byte[Posting.BLOCK]);
+		writeSlotSize(PostPoses.SIZE_LEN);
+		write(new byte[PostPoses.BLOCK]);
 	}
 	
 	private void allocate() throws IOException {
-		writeSlotSize(Posting.SIZE_LEN);
-		byte[] bytes = new byte[Posting.BLOCK];
-		for (int i=Posting.SIZE_LEN; i<slotVol; i+=Posting.BLOCK) {
+		writeSlotSize(PostPoses.SIZE_LEN);
+		byte[] bytes = new byte[PostPoses.BLOCK];
+		for (int i=PostPoses.SIZE_LEN; i<slotVol; i+=PostPoses.BLOCK) {
 			write(bytes);
 		}
 	}
@@ -149,15 +154,16 @@ class PostWriter extends PostIO {
 		java.util.Random rand = new java.util.Random();
 		String term = "term";
 		String docURL = "docURL";
-		TermInfo termInfo = new TermInfo(term);
-		for (int time=0; time<1000000; time++) {
+		TermInfo termInfo = new TermInfo(term, 0, 1);
+		
+		for (int time=0; time<500000; time++) {
 			System.out.println("time = "+time);
 			List<Integer> poses = new ArrayList<Integer>();
-			for (int i=0; i<5; i++) {
+			int len = rand.nextInt(100);
+			for (int i=0; i<len; i++) {
 				poses.add(rand.nextInt(100));
 			}
-			Posting post = new Posting(term,
-					Field.decode(rand.nextInt(Field.NUM_OF_FIELDS)),docURL,poses);
+			Posting post = new Posting(term, docURL, rand.nextInt(Zones.NUM_OF_ZONES), poses);
 			writePost(post, termInfo);
 		}
 	}

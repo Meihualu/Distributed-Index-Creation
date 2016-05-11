@@ -1,4 +1,4 @@
-package cn.edu.sjtu.acemap.indexer;
+package cn.edu.sjtu.devinz.indexer;
 
 import java.io.Closeable;
 import java.io.EOFException;
@@ -8,6 +8,7 @@ import java.nio.channels.FileLock;
 
 import org.apache.hadoop.hbase.util.Bytes;
 
+
 abstract class PostIO implements Closeable {
 	
 	private final RandomAccessFile rf;
@@ -16,23 +17,19 @@ abstract class PostIO implements Closeable {
 	private byte[] buffer = new byte[1024];
 	private int maxPtr = 0, bufPtr = 0;
 	
-	protected final String field;
 	protected final int slotVol;
+	protected final String zone;
 	protected final long slotPos;
 	
 	private int slotSize;
 	
-	protected PostIO(int postPos, boolean write) throws IOException {
-		int partNO = Posting.getPartNO(postPos);
-		slotVol = Posting.getSlotVolume(partNO);
-		slotPos = 1L * Posting.getPostNO(postPos) * slotVol;
-		field = Field.decode(Posting.getFieldCode(postPos));
-		if (null == field) {
-			System.out.println("invalid field code");
-			System.exit(1);
-		}
+	protected PostIO(int postPos, int zoneCode, boolean write) throws IOException {
+		int partNO = PostPoses.getPartNO(postPos);
+		slotVol = PostPoses.getSlotVolume(partNO);
+		slotPos = 1L * PostPoses.getSlotNO(postPos) * slotVol;
+		zone = Zones.decode(zoneCode);
 		
-		rf = new RandomAccessFile("/home/hadoop/index/"+partNO+"."+field, 
+		rf = new RandomAccessFile("/home/hadoop/.devin/index/"+partNO+"."+zone, 
 				write? "rw" : "r");
 		fl = rf.getChannel().lock(slotPos, slotVol, !write);
 		
@@ -40,12 +37,12 @@ abstract class PostIO implements Closeable {
 	}
 	
 	@Override public String toString() {
-		int partNO = 0, tmp = (slotVol-Posting.SIZE_LEN)/Posting.UNIT;
+		int partNO = 0, tmp = (slotVol-PostPoses.SIZE_LEN)/PostPoses.UNIT;
 		while (tmp > 1) {
-			tmp /= Posting.RADIX;
+			tmp /= PostPoses.RADIX;
 			partNO++;
 		}
-		return "[PostIO] "+partNO+"."+field+" @ "+slotPos;
+		return "[PostIO] "+partNO+"."+zone+" @ "+slotPos;
 	}
 	
 	public abstract Posting nextPosting() throws IOException;
@@ -71,7 +68,7 @@ abstract class PostIO implements Closeable {
 		try {
 			slotSize = rf.readInt();
 		} catch (EOFException e) {
-			writeSlotSize(Posting.SIZE_LEN);
+			writeSlotSize(PostPoses.SIZE_LEN);
 		}
 		bufPtr = maxPtr = 0;
 	}

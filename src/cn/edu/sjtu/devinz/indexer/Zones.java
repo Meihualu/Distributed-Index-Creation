@@ -1,9 +1,10 @@
-package cn.edu.sjtu.acemap.indexer;
+package cn.edu.sjtu.devinz.indexer;
 
+import java.util.Arrays;
 
-public class Field {
+public class Zones {
 	
-	private static final String[] fields = {
+	private static final String[] zones = {
 		"title",
 		"author",
 		"abstract",
@@ -13,11 +14,17 @@ public class Field {
 		"reference"
 	};
 	
-	public static final int NUM_OF_FIELDS = fields.length;
+	public static final int NUM_OF_ZONES = zones.length;
 	
-	public static int encode(String field) {
-		for (int i=0; i<fields.length; i++) {
-			if (isSame(field, fields[i])) {
+	public static final double[] weights = new double[NUM_OF_ZONES];
+	
+	static {
+		Arrays.fill(weights, 1./NUM_OF_ZONES);
+	}
+	
+	public static int encode(String zone) {
+		for (int i=0; i<zones.length; i++) {
+			if (isSame(zone, zones[i])) {
 				return i;
 			}
 		}
@@ -25,10 +32,10 @@ public class Field {
 	}
 	
 	public static String decode(int code) {
-		if (code<0 || code>=fields.length) {
+		if (code<0 || code>=zones.length) {
 			return null;
 		} else {
-			return fields[code];
+			return zones[code];
 		}
 	}
 	

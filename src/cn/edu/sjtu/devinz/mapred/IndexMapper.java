@@ -1,4 +1,4 @@
-package cn.edu.sjtu.acemap.indexer;
+package cn.edu.sjtu.devinz.mapred;
 
 import java.io.IOException;
 import java.util.StringTokenizer;
@@ -7,6 +7,8 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
+import cn.edu.sjtu.devinz.indexer.Local;
+
 
 class IndexMapper extends Mapper<LongWritable, Text, Text, Text> {
 	
@@ -14,15 +16,14 @@ class IndexMapper extends Mapper<LongWritable, Text, Text, Text> {
 	public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
 		
-		String valueString = value.toString().trim();
-		StringTokenizer toks = new StringTokenizer(valueString);
+		String val = value.toString().replace('\t', ' ').trim();
+		StringTokenizer toks = new StringTokenizer(val);
+		
 		try {
-			String url = toks.nextToken();
-			String val = valueString.substring(url.length()+1);
-			context.write(new Text(url), new Text(val));
+			context.write(new Text(toks.nextToken()), new Text(val));
 		} catch (Exception e) {
 			e.printStackTrace();
-			LocalLog.append("IndexMapper.log", valueString+":\t"+e);
+			Local.log("IndexMapper.log", val+":\t"+e);
 		}
 	}
 	

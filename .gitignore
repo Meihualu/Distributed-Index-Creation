@@ -1,8 +1,11 @@
 bin/
 lib/
+*.rdb
 *.log
 *.class
+*.jar
 *.classpath
 *.project
 *.properties
 *.xml
+commit.sh
