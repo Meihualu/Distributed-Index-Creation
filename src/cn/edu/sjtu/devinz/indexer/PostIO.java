@@ -5,29 +5,34 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
+import java.util.ArrayList;
 
 import org.apache.hadoop.hbase.util.Bytes;
-
 
 abstract class PostIO implements Closeable {
 	
 	private final RandomAccessFile rf;
 	private final FileLock fl;
 	
-	private byte[] buffer = new byte[1024];
+	private final byte[] buffer = new byte[1024];
 	private int maxPtr = 0, bufPtr = 0;
 	
 	protected final int slotVol;
-	protected final String zone;
+	protected final String zone, term;
 	protected final long slotPos;
+	
+	protected int prevDocID = 0;
 	
 	private int slotSize;
 	
-	protected PostIO(int postPos, int zoneCode, boolean write) throws IOException {
+	protected PostIO(String term, int postPos, int zoneCode, boolean write) 
+			throws IOException {
+		
 		int partNO = PostPoses.getPartNO(postPos);
 		slotVol = PostPoses.getSlotVolume(partNO);
 		slotPos = 1L * PostPoses.getSlotNO(postPos) * slotVol;
 		zone = Zones.decode(zoneCode);
+		this.term = term;
 		
 		rf = new RandomAccessFile("/home/hadoop/.devin/index/"+partNO+"."+zone, 
 				write? "rw" : "r");
@@ -45,9 +50,22 @@ abstract class PostIO implements Closeable {
 		return "[PostIO] "+partNO+"."+zone+" @ "+slotPos;
 	}
 	
-	public abstract Posting nextPosting() throws IOException;
+	public Posting nextPosting() throws IOException {
+		Posting post = null;
+		if (!beyondEnd()) {
+			String docURL = DocMeta.getURL(prevDocID+=nextInt());
+			int numOfPoses = nextInt();
+			
+			post = new Posting(term, docURL, Zones.encode(zone),
+					new ArrayList<Integer>(numOfPoses));
+			for (int i=0, prevPost=0; i<numOfPoses; i++) {
+				post.poses.add(prevPost+=nextInt());
+			}
+		}
+		return post;
+	}
 	
-	@Override public void close() throws IOException {
+	public void close() throws IOException {
 		try {
 			fl.release();
 		} finally {
@@ -68,6 +86,8 @@ abstract class PostIO implements Closeable {
 		try {
 			slotSize = rf.readInt();
 		} catch (EOFException e) {
+			rf.seek(slotPos+slotVol-1);	/* allocate space */
+			rf.writeByte(0);
 			writeSlotSize(PostPoses.SIZE_LEN);
 		}
 		bufPtr = maxPtr = 0;
@@ -77,7 +97,7 @@ abstract class PostIO implements Closeable {
 		rf.seek(slotPos);
 		rf.write(Bytes.toBytes(size));
 		if ((slotSize = size) > slotVol) {
-			throw new RuntimeException("set slotSize greater than slotVol");
+			throw new RuntimeException("set slotSize "+slotSize+" greater than slotVol "+slotVol);
 		}
 	}
 	

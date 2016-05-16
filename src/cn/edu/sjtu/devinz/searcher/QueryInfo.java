@@ -36,4 +36,18 @@ public class QueryInfo {
 		return terms.keySet();
 	}
 	
+	@Override public String toString() {
+		if (terms.isEmpty()) {
+			return "";
+		} else {
+			StringBuffer sb = new StringBuffer();
+			
+			for (String term : terms.keySet()) {
+				sb.append(" ");
+				sb.append(term);
+			}
+			return sb.toString();
+		}
+	}
+	
 }

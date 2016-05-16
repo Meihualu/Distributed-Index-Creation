@@ -45,7 +45,7 @@ public class IndexBuilder {
 	
 	public static void main(String[] args) {
 		try {
-			build("/TextTransformation/terms.txt");
+			build("/TextTransformation/");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

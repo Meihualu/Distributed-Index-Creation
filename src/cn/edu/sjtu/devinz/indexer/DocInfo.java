@@ -4,7 +4,7 @@ public class DocInfo {
 
 	public final String URL;
 	
-	public int[] zoneStats = new int[Zones.NUM_OF_ZONES];
+	public final int[] zoneStats = new int[Zones.NUM_OF_ZONES];
 	
 	public DocInfo(String URL) {
 		this.URL = URL;

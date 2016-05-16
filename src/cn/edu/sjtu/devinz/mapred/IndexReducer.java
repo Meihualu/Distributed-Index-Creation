@@ -7,7 +7,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import cn.edu.sjtu.devinz.indexer.DocMeta;
-import cn.edu.sjtu.devinz.indexer.DocSet;
 import cn.edu.sjtu.devinz.indexer.Indexer;
 import cn.edu.sjtu.devinz.indexer.Local;
 import cn.edu.sjtu.devinz.indexer.Zones;
@@ -34,21 +33,24 @@ class IndexReducer extends Reducer<Text, Text, Text, Text> {
         throws IOException, InterruptedException {
 
 		String url = key.toString();
-		DocSet.incNumOfDoc();
 		
-		for (Text value : values) {
-			String[] toks = split(value.toString());
+		if (null == DocMeta.read(DocMeta.getDocID(url))) {
+			DocMeta.addDoc(url);
 			
-			if (4==toks.length && toks[1].equals("DOC")) {
-				DocMeta.addZone(url, toks[2], Integer.valueOf(toks[3]));
-			} else if (5==toks.length && toks[1].equals("TERM")) {
-				int zoneCode = Zones.encode(toks[3]);
+			for (Text value : values) {
+				String[] toks = split(value.toString());
 				
-				if (zoneCode >= 0) {
-					try {
-						Indexer.addPost(toks[2], url, zoneCode, toks[4].split(","));
-					} catch (IOException e) {
-						Local.log("IndexReducer.log", value.toString()+":\t"+e);
+				if (4==toks.length && toks[1].equals("DOC")) {
+					DocMeta.addZone(url, toks[2], Integer.valueOf(toks[3]));
+				} else if (5==toks.length && toks[1].equals("TERM")) {
+					int zoneCode = Zones.encode(toks[3]);
+					
+					if (zoneCode >= 0) {
+						try {
+							Indexer.addPost(toks[2], url, zoneCode, toks[4].split(","));
+						} catch (IOException e) {
+							Local.log("IndexReducer.log", value.toString()+":\t"+e);
+						}
 					}
 				}
 			}

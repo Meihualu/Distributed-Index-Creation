@@ -22,7 +22,6 @@ class IndexMapper extends Mapper<LongWritable, Text, Text, Text> {
 		try {
 			context.write(new Text(toks.nextToken()), new Text(val));
 		} catch (Exception e) {
-			e.printStackTrace();
 			Local.log("IndexMapper.log", val+":\t"+e);
 		}
 	}

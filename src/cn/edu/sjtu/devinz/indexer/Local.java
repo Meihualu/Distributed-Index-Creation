@@ -31,7 +31,7 @@ public class Local {
 	}
 	
 	public static void log(String fileName, String line) {
-		System.out.println(line);
+		//System.out.println(line);
 		try {
 			FileOutputStream fos = new FileOutputStream("/home/hadoop/.devin/logs/"+fileName, true);	/* append */
 			try {

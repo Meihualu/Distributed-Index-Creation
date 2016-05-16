@@ -15,6 +15,8 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -38,7 +40,6 @@ public class TermDict implements Closeable {
 	}
 	
 	public TermInfo read(String value, int zoneCode) throws IOException {
-		Local.log("TermDict.log", "read:\t"+value+"\t"+zoneCode);
 		Result result = table.get(new Get(Bytes.toBytes(value)));
 		if (null == result || result.isEmpty()) {
 			return null;
@@ -85,6 +86,11 @@ public class TermDict implements Closeable {
 		}
 	}
 	
+	public synchronized void clear() throws IOException {
+		Admin admin = connection.getAdmin();
+		admin.disableTable(TableName.valueOf("TermDict"));
+		admin.truncateTable(TableName.valueOf("TermDict"), true);
+	}
 	
 	private static final Configuration config = HBaseConfiguration.create();
 	
@@ -107,50 +113,72 @@ public class TermDict implements Closeable {
 	}
 	
 	public static void main(String[] args) throws IOException {
+		final int SIZE = 100;
 		java.util.Random rand = new java.util.Random();
 		TermDict dict = getInstance();
-		final int SIZE = 100;
-		List<TermInfo> terms = new ArrayList<TermInfo>(SIZE);
-		for (int i=0; i<SIZE; i++) {
-			TermInfo term = new TermInfo("term_"+i, rand.nextInt(Zones.NUM_OF_ZONES), 1+rand.nextInt(99));
-			int n = 1+rand.nextInt(5);
-			for (int j=0; j<n; j++) {
-				term.addPostPos(rand.nextInt(1000));
+		
+		try {
+			dict.clear();
+			List<TermInfo> terms = new ArrayList<TermInfo>(SIZE);
+			for (int i=0; i<SIZE; i++) {
+				TermInfo term = new TermInfo("term_"+i, rand.nextInt(Zones.NUM_OF_ZONES), 1+rand.nextInt(99));
+				int n = 1+rand.nextInt(5);
+				for (int j=0; j<n; j++) {
+					term.addPostPos(rand.nextInt(1000));
+				}
+				terms.add(term);
+				for (int j=0; j<term.docFreq; j++) {
+					dict.incDocFreq(term.value);
+				}
+				dict.addPostPoses(term.value, term.zoneCode, term.postPoses);
+				System.out.println(term);
 			}
-			terms.add(term);
-			for (int j=0; j<term.docFreq; j++) {
-				dict.incDocFreq(term.value);
-			}
-			dict.addPostPoses(term.value, term.zoneCode, term.postPoses);
-			System.out.println(term);
-		}
-		System.out.println();
-		for (int i=0; i<SIZE; i++) {
-			TermInfo term = dict.read("term_"+i, terms.get(i).zoneCode);
+			System.out.println();
 			
-			if (null == term) {
-				exit(1);
-			} else if (!terms.get(i).equals(term)) {
-				exit(2);
+			for (int i=0; i<SIZE; i++) {
+				TermInfo term = dict.read("term_"+i, terms.get(i).zoneCode);
+				
+				if (null == term) {
+					exit(1);
+				} else if (!terms.get(i).equals(term)) {
+					exit(2);
+				}
 			}
+			
+			dict.clear();
+			System.out.println("All tests OK.");
+		} finally {
+			dict.close();
 		}
-		System.out.println("All tests OK.");
-		exit(0);
 	}
 	
 	private static void exit(int argv) throws IOException {
-		Connection connection = ConnectionFactory.createConnection(config);
-		try {
-			Admin admin = connection.getAdmin();
-			admin.disableTable(TableName.valueOf("TermDict"));
-			admin.truncateTable(TableName.valueOf("TermDict"), true);
-			if (0 != argv) {
-				throw new RuntimeException("Failure "+argv);
-			}
-		} finally {
-			connection.close();
-			getInstance().close();
+		if (0 != argv) {
+			throw new RuntimeException("Failure "+argv);
+		} else {
+			System.exit(0);
 		}
+	}
+	
+	public List<String> getTerms() throws IOException {
+		ResultScanner scanner = table.getScanner(new Scan());
+		
+        try {
+            List<String> lst = new ArrayList<String>();
+            Result result = scanner.next();
+            
+            while (null != result) {
+            	String term = Bytes.toString(result.getRow());
+            	
+            	if (!lst.contains(term)) {
+            		lst.add(term);
+            	}
+            	result = scanner.next();
+            }
+            return lst;
+        } finally {
+            scanner.close();
+        }
 	}
 	
 }

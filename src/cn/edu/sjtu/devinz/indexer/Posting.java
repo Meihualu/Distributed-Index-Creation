@@ -11,13 +11,17 @@ public class Posting {
 	public final List<Integer> poses;
 	
 	public Posting(String term, String docURL, int zoneCode, List<Integer> poses) {
-		if (null != poses) {
+		if (null == term) {
+			throw new NullPointerException("null == term");
+		} else if (null == docURL) {
+			throw new NullPointerException("null == docURL");
+		} else if (null == poses) {
+			throw new NullPointerException("null == poses");
+		} else {
 			this.term = term;
 			this.docURL = docURL;
 			this.zoneCode = zoneCode;
 			this.poses = poses;
-		} else {
-			throw new NullPointerException("null == poses");
 		}
 	}
 	
@@ -61,8 +65,8 @@ public class Posting {
 		return sb.toString();
 	}
 	
-	public int lenOfBytes() {
-		int size = docURL.length()+1;
+	public int lenOfBytes(int prevDocID) {
+		int size = getCodeLength(DocMeta.getDocID(docURL)-prevDocID);
 		size += getCodeLength(poses.size());
 		int prevPos = 0;
 		for (Integer pos : poses) {
@@ -82,11 +86,8 @@ public class Posting {
 		return len;
 	}
 	
-	public byte[] toBytes(int size) {
+	public byte[] toBytes(int size, int prevDocID) {
 		byte[] bytes = new byte[size];
-		for (int i=0; i<docURL.length(); i++) {
-			bytes[i] = (byte) docURL.charAt(i);
-		}
 		int j = bytes.length-1;
 		if (poses.size() > 0) {
 			for (int i=poses.size()-1; i>0; i--) {
@@ -95,7 +96,7 @@ public class Posting {
 			j = toBytes(poses.get(0), bytes, j);
 		}
 		j = toBytes(poses.size(), bytes, j);
-		bytes[j] = (byte)'\0';
+		j = toBytes(DocMeta.getDocID(docURL)-prevDocID, bytes, j);
 		return bytes;
 	}
 	
