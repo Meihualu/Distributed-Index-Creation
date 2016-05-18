@@ -8,16 +8,22 @@ import numpy as np
 import matplotlib.pylab as pl
 
 
-def plot(stats):
+def plot(stats, w):
     pl.title("Stats of Slot Sizes")
     pl.xlabel("size")
     pl.ylabel("density")
     pl.xlim(0,5000)
     pl.ylim(0,1000)
-    pl.plot(stats)
+    pl.plot(stats, label='real slot size')
+    y = []
+    for x in range(1,len(stats)):
+        y.append(w[0,0]+w[1,0]/x)
+    pl.plot(range(1,len(stats)),y, label='predictive value')
+    pl.legend()
     pl.show()
 
 def regress(stats):
+    LAMBDA = 0
     X = [[], []]
     y = []
     for idx in range(1, len(stats)):
@@ -26,7 +32,7 @@ def regress(stats):
         y.append(stats[idx])
     X = np.mat(X)
     y = np.mat(y)
-    return inv(X*X.transpose())*X*y.transpose()
+    return inv(LAMBDA*np.eye(X.shape[0])+X*X.transpose())*X*y.transpose()
 
 
 if __name__=='__main__':
@@ -57,5 +63,5 @@ if __name__=='__main__':
             break
     w = regress(stats)
     print "density = "+str(w[0,0])+" + "+str(w[1,0])+" / slot_size"
-    plot(stats)
+    plot(stats, w)
 
