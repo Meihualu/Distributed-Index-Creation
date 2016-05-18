@@ -3824,6 +3824,6 @@
     Median of Slot Sizes:   10
     density = 0.337230048633 + 11696.0794566 / slot_size
 
-![stats](test_stats.png)
+![stats](stats.png)
 
 

@@ -9,7 +9,7 @@ import matplotlib.pylab as pl
 
 
 def plot(stats):
-    pl.title("Stats of Slot Size")
+    pl.title("Stats of Slot Sizes")
     pl.xlabel("size")
     pl.ylabel("density")
     pl.xlim(0,5000)
