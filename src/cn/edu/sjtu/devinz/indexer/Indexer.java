@@ -1,9 +1,12 @@
 package cn.edu.sjtu.devinz.indexer;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
+
+import org.apache.commons.io.FileUtils;
 
 public class Indexer {
 
@@ -27,11 +30,8 @@ public class Indexer {
                 }
                 Collections.sort(post.poses);
                 try {
-                    //Local.log("Indexer.log", "try to write the posting");
                     PostWriter.writePost(post, termInfo);
-                    //Local.log("Indexer.log", "try to add postPoses");
                     dict.addPostPoses(term, zoneCode, termInfo.postPoses);
-                    //Local.log("Indexer.log", "done");
                 } catch (IOException e) {
                     Local.log("Indexer.log", term+"\t"+url+":\t"+e);
                 }
@@ -43,20 +43,13 @@ public class Indexer {
         Scanner in = new Scanner(System.in);
 
         try {
-            System.out.println("Are you sure to remove all indexes? [Y/N]");
+            System.out.println("Are you sure to remove all local indexes? [Y/N]");
             String cmd = in.nextLine().trim();
             
             if (cmd.equals("Y") || cmd.equals("y")) {
-                TermDict dict = TermDict.getInstance();
-
-                try {
-                    Runtime.getRuntime().exec("rm -f index/*");
-                    Runtime.getRuntime().exec("rm -f logs/*.log");
-                    DocMeta.clear();
-                    dict.clear();
-                } finally {
-                    dict.close();
-                }
+            	FileUtils.cleanDirectory(new File("index/"));
+				FileUtils.cleanDirectory(new File("logs/"));
+                DocMeta.clear();
             }
         } finally {
             in.close();

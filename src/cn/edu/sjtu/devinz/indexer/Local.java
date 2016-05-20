@@ -6,8 +6,6 @@ import java.sql.Timestamp;
 
 public class Local {
 
-    private static java.util.Date date = new java.util.Date();
-
     public static final String NODE_NAME;
 
     static {
@@ -21,23 +19,28 @@ public class Local {
                 reader.close();
             }
         } catch (IOException e) {
+        	log("Local.log", e.toString());
             e.printStackTrace();
         } finally {
             if (null == (NODE_NAME = line)) {
                 System.exit(1);
             }
         }
-        //Local.log("Local.log", NODE_NAME);
+        log("Local.log", NODE_NAME);
     }
 
     public static void log(String fileName, String line) {
-        //System.out.println(line);
+    	final java.util.Date date = new java.util.Date();
+    	
         try {
             FileOutputStream fos = new FileOutputStream("/home/hadoop/.devin/logs/"+fileName, true);	/* append */
+            
             try {
                 PrintWriter out = new PrintWriter(fos);
+                
                 try {
                     FileLock fl = fos.getChannel().lock();	/* blocking */
+ 
                     try {
                         out.write("["+new Timestamp(date.getTime())+"]\t"+line+"\n");
                     } finally {

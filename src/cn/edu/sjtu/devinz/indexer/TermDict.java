@@ -170,9 +170,7 @@ public class TermDict implements Closeable {
             while (null != result) {
                 String term = Bytes.toString(result.getRow());
 
-                if (!lst.contains(term)) {
-                    lst.add(term);
-                }
+                lst.add(term);
                 result = scanner.next();
             }
             return lst;

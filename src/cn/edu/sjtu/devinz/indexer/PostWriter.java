@@ -94,7 +94,7 @@ class PostWriter extends PostIO {
             to.write(merger.nextBlock());
         }
     }
-
+    
     private static int newPostPos(int zoneCode, int partNO) 
         throws FileNotFoundException, IOException {
 

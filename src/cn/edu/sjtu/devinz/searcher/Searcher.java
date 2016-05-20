@@ -147,7 +147,7 @@ public abstract class Searcher {
                 for (int zoneCode=0; zoneCode<Zones.NUM_OF_ZONES; zoneCode++) {
                     try {
                         TermInfo termInfo = TermDict.getInstance().read(term, zoneCode);
-
+                        
                         if (null != termInfo) {
                             docFreq += termInfo.docFreq;
                         }

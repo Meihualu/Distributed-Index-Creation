@@ -32,10 +32,11 @@ public class IndexBuilder {
         FileInputFormat.addInputPath(job, new Path(inputPath));
         FileOutputFormat.setOutputPath(job, new Path("/index"));
         job.setMapperClass(IndexMapper.class);
+        job.setPartitionerClass(IndexPartitioner.class);
         job.setReducerClass(IndexReducer.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
-        System.out.println("MapReduce starts.");
+        job.setNumReduceTasks(64);
         if (job.waitForCompletion(true)) {
             System.out.println("All is done.");
         } else {
@@ -45,10 +46,13 @@ public class IndexBuilder {
 
     public static void main(String[] args) {
         try {
-            build("/TT/term*");
+        	if (1 != args.length) {
+        		build("/TT/term*");
+        	} else {
+        		build("/TT/term*"+args[0]);
+        	}
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
 }
