@@ -116,7 +116,7 @@ public abstract class Searcher {
             if (null != docInfo) {
                 int docLen = 0;
                 for (int zoneCode=0; zoneCode<Zones.NUM_OF_ZONES; zoneCode++) {
-                    docLen += docInfo.zoneStats[zoneCode];
+                    docLen += docInfo.zoneStats[zoneCode]+1;
                 }
                 q.add(new DocResult(docURL, dot/docLen));
             } else {

@@ -45,10 +45,10 @@ public class TermDict implements Closeable {
             return null;
         } else {
             TermInfo termInfo = new TermInfo(value, zoneCode, Bytes.toInt
-                    (result.getValue(Bytes.toBytes("common"), Bytes.toBytes("docFreq"))));
+                    (result.getValue(Bytes.toBytes("DOC"), Bytes.toBytes("docFreq"))));
             String postPoses = Bytes.toString(result.getValue
-                    (Bytes.toBytes(Local.NODE_NAME), 
-                     Bytes.toBytes(Zones.decode(zoneCode))));
+                    (Bytes.toBytes(Zones.decode(zoneCode)),
+                     Bytes.toBytes(Local.NODE_NAME)));
 
             if (null != postPoses) {
                 StringTokenizer postToks = new StringTokenizer(postPoses);
@@ -64,10 +64,10 @@ public class TermDict implements Closeable {
         Put put = new Put(Bytes.toBytes(term));
 
         Result result = table.get(new Get(Bytes.toBytes(term)));
-        int docFreq = result.isEmpty()? 1 : Bytes.toInt(result.getValue(Bytes.toBytes("common"),
+        int docFreq = result.isEmpty()? 1 : Bytes.toInt(result.getValue(Bytes.toBytes("DOC"),
                     Bytes.toBytes("docFreq")))+1;
 
-        put.addColumn(Bytes.toBytes("common"), Bytes.toBytes("docFreq"), Bytes.toBytes(docFreq));
+        put.addColumn(Bytes.toBytes("DOC"), Bytes.toBytes("docFreq"), Bytes.toBytes(docFreq));
         table.put(put);
     }
 
@@ -80,7 +80,7 @@ public class TermDict implements Closeable {
                 sb.append(postPoses.get(i));
             }
             Put put = new Put(Bytes.toBytes(term));
-            put.addColumn(Bytes.toBytes(Local.NODE_NAME), Bytes.toBytes(Zones.decode(zoneCode)), 
+            put.addColumn(Bytes.toBytes(Zones.decode(zoneCode)), Bytes.toBytes(Local.NODE_NAME),
                     Bytes.toBytes(sb.toString()));
             table.put(put);
         }
