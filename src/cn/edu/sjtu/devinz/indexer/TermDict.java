@@ -161,7 +161,7 @@ public class TermDict implements Closeable {
     }
 
     public List<String> getTerms() throws IOException {
-    	System.out.println("Loading Vocabulary ... This may take some time.");
+        System.out.println("Loading Vocabulary ... This may take some time.");
         ResultScanner scanner = table.getScanner(new Scan());
 
         try {

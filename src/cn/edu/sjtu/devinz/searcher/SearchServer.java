@@ -18,7 +18,7 @@ class SearchServer {
 
     public static final int PORT_NO = 10086;
 
-    private static Searcher searcher = new Searcher() {
+    private static final Searcher searcher = new Searcher() {
 
         protected double evalQuery(String term, QueryInfo queryInfo) {
             double docFreq = 0;
@@ -43,6 +43,22 @@ class SearchServer {
 
     };
 
+    private static DocResult[] search(QueryInfo queryInfo) throws IOException {
+        DocResult[] results = QueryCache.load(queryInfo);
+
+        if (null != results) {
+            return results;
+        } else {
+            long start = System.currentTimeMillis();
+
+            results = searcher.search(queryInfo);
+            if (System.currentTimeMillis()-start > 2000) {
+                QueryCache.store(queryInfo, results);
+            }
+            return results;
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         TermDict dict = TermDict.getInstance();
 
@@ -66,7 +82,7 @@ class SearchServer {
                                 queryInfo.addTerm(toks.nextToken());
                             }
 
-                            DocResult[] docResults = searcher.search(queryInfo);
+                            DocResult[] docResults = search(queryInfo);
                             PrintWriter out = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
 
                             try {

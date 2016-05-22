@@ -55,11 +55,11 @@ public class IndexBuilder {
 
     public static void main(String[] args) {
         try {
-        	if (1 != args.length) {
-        		build("/TT/term*");
-        	} else {
-        		build("/TT/term*0"+args[0]);
-        	}
+            if (1 != args.length) {
+                build("/TT/term*");
+            } else {
+                build("/TT/term*0"+args[0]);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
