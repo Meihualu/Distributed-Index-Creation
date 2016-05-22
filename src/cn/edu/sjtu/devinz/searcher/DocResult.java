@@ -25,4 +25,15 @@ public class DocResult implements Comparable<DocResult> {
         return url+":\t"+score;
     }
 
+    public static DocResult valueOf(String result) {
+        String[] arr = result.trim().split("\t");
+
+        if (2 != arr.length) {
+            return null;
+        } else {
+            return new DocResult(arr[0].substring(0,arr[0].length()-1),
+                    Double.valueOf(arr[1]));
+        }
+    }
+
 }

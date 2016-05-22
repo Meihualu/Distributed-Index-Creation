@@ -6,9 +6,18 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+class IndexPartitioner extends Partitioner<Text,Text> {
+
+    @Override
+    public int getPartition(Text key, Text value, int num) {
+        return (key.toString().hashCode()&Integer.MAX_VALUE) % num;
+    }
+
+}
 
 public class IndexBuilder {
 
@@ -49,7 +58,7 @@ public class IndexBuilder {
         	if (1 != args.length) {
         		build("/TT/term*");
         	} else {
-        		build("/TT/term*"+args[0]);
+        		build("/TT/term*0"+args[0]);
         	}
         } catch (Exception e) {
             e.printStackTrace();

@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
-import java.util.Scanner;
-import java.util.StringTokenizer;
 
 import cn.edu.sjtu.devinz.indexer.DocInfo;
 import cn.edu.sjtu.devinz.indexer.DocMeta;
@@ -147,7 +145,7 @@ public abstract class Searcher {
                 for (int zoneCode=0; zoneCode<Zones.NUM_OF_ZONES; zoneCode++) {
                     try {
                         TermInfo termInfo = TermDict.getInstance().read(term, zoneCode);
-                        
+
                         if (null != termInfo) {
                             docFreq += termInfo.docFreq;
                         }
@@ -185,38 +183,7 @@ public abstract class Searcher {
             System.out.println();
         }
         System.out.println("Mean Search Time:\t"+meanTime+" ms");
-
-        cmdTest(searcher);
-    }
-
-    public static void cmdTest(Searcher searcher) throws IOException {
-        Scanner in = new Scanner(System.in);
-
-        try {
-            System.out.print("> ");
-            System.out.flush();
-            String line = in.nextLine();
-
-            while (null!=line && line.trim().length()>0) {
-                StringTokenizer toks = new StringTokenizer(line);
-                QueryInfo queryInfo = new QueryInfo();
-
-                while (toks.hasMoreTokens()) {
-                    queryInfo.addTerm(toks.nextToken());
-                }
-                DocResult[] docResults = searcher.search(queryInfo);
-                for (DocResult docResult : docResults) {
-                    System.out.println("\t"+docResult);
-                }
-                System.out.println();
-
-                System.out.print("> ");
-                System.out.flush();
-                line = in.nextLine();
-            }
-        } finally {
-            in.close();
-        }
     }
 
 }
+
