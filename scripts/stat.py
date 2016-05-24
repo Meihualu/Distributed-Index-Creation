@@ -36,7 +36,7 @@ def regress(stats):
 
 
 if __name__=='__main__':
-    stats = [0]*1000000
+    stats = [0]*1260000
     line_cnt = 0
     total_size = 0
     fin = open("doc/test_stats.out", 'r')

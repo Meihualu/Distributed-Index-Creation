@@ -11,19 +11,18 @@ import cn.edu.sjtu.devinz.indexer.Local;
 
 
 class IndexMapper extends Mapper<LongWritable, Text, Text, Text> {
-	
-	@Override
-	public void map(LongWritable key, Text value, Context context)
+
+    @Override public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
-		
-		String val = value.toString().replace('\t', ' ').trim();
-		StringTokenizer toks = new StringTokenizer(val);
-		
-		try {
-			context.write(new Text(toks.nextToken()), new Text(val));
-		} catch (Exception e) {
-			Local.log("IndexMapper.log", val+":\t"+e);
-		}
-	}
-	
+
+        String val = value.toString().replace('\t', ' ').trim();
+        StringTokenizer toks = new StringTokenizer(val);
+
+        try {
+            context.write(new Text(toks.nextToken()), new Text(val));
+        } catch (Exception e) {
+            Local.log("IndexMapper.log", val+":\t"+e);
+        }
+    }
+
 }

@@ -452,11 +452,11 @@
 
 ## Statistics of Slot Sizes:
 
-    Average Slot Size:  91
-    Mode of Slot Sizes: 7
-    Maximum Slot Size:  200138
-    Median of Slot Sizes:   10
-    density = 0.337230048633 + 11696.0794566 / slot_size
+    Average Slot Size:  186
+    Mode of Slot Sizes: 8
+    Maximum Slot Size:  1139256
+    Median of Slot Sizes:   8
+    density = 0.236013278902 + 67581.3920854 / slot_size
 
 ![stats](slot_sizes.png)
 

@@ -5,19 +5,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 
 public class Indexer {
 
-    public static void addPost(String term, String url, int zoneCode, String[] poses) 
-        throws IOException {
+    public static void addPost(String term, String url, int zoneCode, 
+            String[] poses, Set<String> terms) throws IOException {
 
         //Local.log("Indexer.log", "addPost:\t"+term+"\t"+url+"\t"+Zones.decode(zoneCode));
 
         if (poses.length > 0) {
             TermDict dict = TermDict.getInstance();
-            dict.incDocFreq(term);
+            if (!terms.contains(term)) {
+                dict.incDocFreq(term);
+                terms.add(term);
+            }
 
             TermInfo termInfo = dict.read(term, zoneCode);
             if (null == termInfo) {
@@ -45,10 +49,10 @@ public class Indexer {
         try {
             System.out.println("Are you sure to remove all local indexes? [Y/N]");
             String cmd = in.nextLine().trim();
-            
+
             if (cmd.equals("Y") || cmd.equals("y")) {
-            	FileUtils.cleanDirectory(new File("index/"));
-				FileUtils.cleanDirectory(new File("logs/"));
+                FileUtils.cleanDirectory(new File("index/"));
+                FileUtils.cleanDirectory(new File("logs/"));
                 DocMeta.clear();
             }
         } finally {

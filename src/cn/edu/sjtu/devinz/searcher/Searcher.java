@@ -35,9 +35,12 @@ public abstract class Searcher {
     private static Map<String,Map<String,Double>> getTermFreqs(QueryInfo queryInfo) 
         throws IOException {
 
-        Map<String, Map<String, Double>> termFreqs = new HashMap<String, Map<String, Double>>();
+        Map<String, Map<String, Double>> termFreqs = 
+            new HashMap<String, Map<String, Double>>();
 
         for (String term : queryInfo.list()) {
+            long start = System.currentTimeMillis();
+
             for (int zoneCode=0; zoneCode<Zones.NUM_OF_ZONES; zoneCode++) {
                 TermInfo termInfo = TermDict.getInstance().read(term, zoneCode);
 
@@ -48,21 +51,22 @@ public abstract class Searcher {
                         try {
                             Posting post = reader.nextPosting();
 
-                            while (null != post) {
-                                double freq = 0;
+                            while (null != post && System.currentTimeMillis() < start+1000) {
+                                if (termFreqs.containsKey(post.docURL)) {
+                                    Map<String, Double> map = termFreqs.get(post.docURL);
 
-                                if (!termFreqs.containsKey(post.docURL)) {
+                                    map.put(term, Zones.weights[zoneCode]*post.poses.size()
+                                            + map.get(term));
+                                } else if (System.currentTimeMillis() < start+500
+                                        || post.poses.size() > 5) {
                                     Map<String, Double> map = new HashMap<String, Double>();
 
                                     for (String termKey : queryInfo.list()) {
                                         map.put(termKey, .0);
                                     }
+                                    map.put(term, Zones.weights[zoneCode]*post.poses.size());
                                     termFreqs.put(post.docURL, map);
-                                } else {
-                                    freq = termFreqs.get(post.docURL).get(term);
-                                }
-                                termFreqs.get(post.docURL).put(term, 
-                                        freq+Zones.weights[zoneCode]*post.poses.size());
+                                        }
                                 post = reader.nextPosting();
                             }
                         } finally {
