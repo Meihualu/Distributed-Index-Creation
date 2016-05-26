@@ -14,7 +14,7 @@ abstract class PostIO implements Closeable {
     private final RandomAccessFile rf;
     private final FileLock fl;
 
-    private final byte[] buffer = new byte[1024];
+    private final byte[] buffer = new byte[6*PostPoses.BLOCK];
     private int maxPtr = 0, bufPtr = 0;
 
     protected final int slotVol;
