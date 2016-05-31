@@ -1,4 +1,4 @@
-# Inverted Index Builder based on Geometrical Partitioning
+# Distributed Inverted Index Creation Module
 
 A Distributed Inverted Index Creation Module for an academic text search engine, 
 which adopts the idea of [Geometrical Partitioning by Lester et al.](http://dl.acm.org/citation.cfm?id=1099739) 
@@ -58,7 +58,9 @@ and takes advantage of _Apache Hadoop_, _Apache HBase_ and _Redis_.
 		└── log4j.properties
 
 (1) Package _cn.edu.sjtu.devinz.mapred_ launches a Hadoop MapReduce job to take in text analysis data and distribute them to multiple index servers.
+
 (2) Package _cn.edu.sjtu.devinz.indexer_ manages the local index creation process on a single index server, where the local inverted files, the document info in Redis database, and the vocabulary in an HBase table would be updated incrementally.
+
 (3) Package _cn.edu.sjtu.devinz.searcher_ implements a naive client-server system which could execute distributed ranked queries and return up to 20 results.
 
 ## Run the Tests
