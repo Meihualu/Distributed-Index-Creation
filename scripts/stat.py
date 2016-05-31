@@ -30,7 +30,7 @@ def regress(stats):
 
 if __name__=='__main__':
     stats = []
-    with open("doc/test_stats.out", 'r') as fin:
+    with open("data/stats.out", 'r') as fin:
         line = fin.readline()
         while line:
             size = int(line.split()[2])

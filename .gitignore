@@ -1,7 +1,10 @@
 bin/
 lib/
+data/
+*.pdf
 *.rdb
 *.log
+*.out
 *.class
 *.jar
 *.classpath
