@@ -66,16 +66,20 @@ and takes advantage of _Apache Hadoop_, _Apache HBase_ and _Redis_.
 ## Run the Tests
 
 The distributed indexing module is designed to work on a Hadoop cluster in the laboratory of IIOT, SJTU.
-At the time we launched the first round of index creation tests, the cluster only comprised one master node and two slave nodes, all of which possess 32 Intel(R) Xeon(R) CPU E5-2630 v3 @ 2.40GHz processors.
+At the time we launched the first round of [index creation tests](doc/mapred.log), the cluster only comprised one master node and two slave nodes, all of which possess 32 Intel(R) Xeon(R) CPU E5-2630 v3 @ 2.40GHz processors.
 All the tests were run in Java Runtime Environment 1.8.0 and Hadoop Platform 2.5.1, along with HBase 1.4.1.
 Text analysis data is stored in the HDFS directory _/TT/_, where each line contains a piece of info about a text document, just like the following picture.
 
-![tt_data](doc/tt_data.png)
+![tt\_data](doc/tt_data.png)
 
 To create indexes, one should guarantee the host name of each index server is stored as a single line in _/etc/hostname_, 
 and that the directory _/home/hadoop/.devin/_ exists and contains two subdirectories named "index" and "logs".
 Local Redis server should be in place with DB 5 available, 
-and an HBase table called "TermDict" should have been built with certain schema.
+and an HBase table named "TermDict" should have been built with the following schema, 
+where "DOC", "title", "author", "abstract" and "reference" are necessary column families.
+
+![dict\_schema](doc/dict_schema.png)
+
 You can compress the binary code and all the necessary library files (HBase and Jedis) into one Jar file, 
 and start the MapReduce job with a command as follow.
 
@@ -83,6 +87,9 @@ and start the MapReduce job with a command as follow.
 
 Since index construction is time-consuming, running the program in background is strongly recommended.
 You can open _logs/mapred.log_ on a regular basis to check the status of the MapReduce job.
+
+Our index creation test turned out to collect [3402936 documents](doc/term_dict.md), [4524622 terms](doc/doc_meta.md) 
+and [6.5GB inverted files](doc/inv_files.md).
 
 To test the indexes you have built, you should first copy the Jar file from master to all slave nodes 
 so that the programs could be run on each index server.
@@ -95,6 +102,7 @@ After doing that, you can start a search client on the master node with the foll
 	java -classpath Indexer.jar:${HADOOP_CLASSPATH}  cn.edu.sjtu.devinz.searcher.SearchClient
 
 Then an interpreter will get your query line by line and return up to 20 results for each query.
+A sample query result could be seen [here](doc/query_test.md).
 
 ## Some Limits
 
