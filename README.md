@@ -66,7 +66,7 @@ and takes advantage of _Apache Hadoop_, _Apache HBase_ and _Redis_.
 ## Run the Tests
 
 The distributed indexing module is designed to work on a Hadoop cluster in the laboratory of IIOT, SJTU.
-At the time we launched the first round of [index creation tests](doc/mapred.log), the cluster only comprised one master node and two slave nodes, all of which possess 32 Intel(R) Xeon(R) CPU E5-2630 v3 @ 2.40GHz processors.
+At the time we launched the first round of index creation tests, the cluster only comprised one master node and two slave nodes, all of which possess 32 Intel(R) Xeon(R) CPU E5-2630 v3 @ 2.40GHz processors.
 All the tests were run in Java Runtime Environment 1.8.0 and Hadoop Platform 2.5.1, along with HBase 1.4.1.
 Text analysis data is stored in the HDFS directory _/TT/_, where each line contains a piece of info about a text document, just like the following picture.
 
@@ -88,7 +88,7 @@ and start the MapReduce job with a command as follow.
 Since index construction is time-consuming, running the program in background is strongly recommended.
 You can open _logs/mapred.log_ on a regular basis to check the status of the MapReduce job.
 
-Our index creation test turned out to collect [3402936 documents](doc/term_dict.md), [4524622 terms](doc/doc_meta.md) 
+Our index creation test turned out to collect [3402936 documents](doc/doc_meta.md), [4524622 terms](doc/term_dict.md) 
 and [6.5GB inverted files](doc/inv_files.md).
 
 To test the indexes you have built, you should first copy the Jar file from master to all slave nodes 
