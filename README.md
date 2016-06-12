@@ -4,6 +4,9 @@ A Distributed Inverted Index Creation Module for an academic text search engine,
 which adopts the idea of [Geometrical Partitioning by Lester et al.](http://dl.acm.org/citation.cfm?id=1099739) 
 and takes advantage of _Apache Hadoop_, _Apache HBase_ and _Redis_.
 
+![partition](doc/partition.gif)
+
+
 ## Contents
 
 	.
@@ -103,6 +106,9 @@ After doing that, you can start a search client on the master node with the foll
 
 Then an interpreter will get your query line by line and return up to 20 results for each query.
 A sample query result could be seen [here](doc/query_test.md).
+
+![queries](doc/queries.gif)
+
 
 ## Some Limits
 

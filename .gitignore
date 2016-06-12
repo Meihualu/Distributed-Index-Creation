@@ -2,6 +2,7 @@ bin/
 lib/
 data/
 *.pdf
+*.pptx
 *.rdb
 *.log
 *.out

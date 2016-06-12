@@ -54,19 +54,23 @@ def add_block(term_idx, part_no):
 
 
 def add_term(term_idx):
-    num = 0
-    for part_no in range(4):
-        if block_cnt[term_idx][part_no]+num < get_capacity(part_no):
-            #print term_idx, part_no
-            for i in range(part_no):
-                clear_slot(term_idx, i)
-            for i in range(num):
-                add_block(term_idx, part_no)
-            add_block(term_idx, 0)
-            return True
-        else:
-            num += block_cnt[term_idx][part_no]
-    return False
+    if block_cnt[term_idx][0]+1 < _UNIT_CAPACITY:
+        add_block(term_idx, 0)
+        return True
+    else:
+        num = _UNIT_CAPACITY
+        for part_no in range(1, 4):
+            if block_cnt[term_idx][part_no]+num < get_capacity(part_no):
+                #print term_idx, part_no
+                for i in range(part_no):
+                    clear_slot(term_idx, i)
+                for i in range(num-1):
+                    add_block(term_idx, part_no)
+                add_block(term_idx, 0)
+                return True
+            else:
+                num += block_cnt[term_idx][part_no]
+        return False
 
 
 class Display(Thread):
