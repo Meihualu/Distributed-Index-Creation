@@ -49,7 +49,7 @@ def add_block(term_idx, part_no):
     canvases[part_no].create_rectangle((4+n)*_PIX_SIZE, (4+2*term_idx)*_PIX_SIZE,
             (5+n)*_PIX_SIZE, (6+2*term_idx)*_PIX_SIZE, 
             fill=colors[term_idx%len(colors)], outline='white')
-    sleep(.01)
+    sleep(.005)
     block_cnt[term_idx][part_no] += 1
 
 
