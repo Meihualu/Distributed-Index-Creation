@@ -1,10 +1,10 @@
 # Distributed Inverted Index Creation Module
 
+![partition](doc/partition.gif)
+
 A Distributed Inverted Index Creation Module for an academic text search engine, 
 which adopts the idea of [Geometrical Partitioning by Lester et al.](http://dl.acm.org/citation.cfm?id=1099739) 
 and takes advantage of _Apache Hadoop_, _Apache HBase_ and _Redis_.
-
-![partition](doc/partition.gif)
 
 
 ## Contents
