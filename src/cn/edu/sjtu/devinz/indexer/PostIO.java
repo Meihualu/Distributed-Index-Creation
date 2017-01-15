@@ -14,7 +14,7 @@ abstract class PostIO implements Closeable {
     private final RandomAccessFile rf;
     private final FileLock fl;
 
-    private final byte[] buffer = new byte[6*PostPoses.BLOCK];
+    private final byte[] buffer = new byte[6*Postings.BLOCK];
     private int maxPtr = 0, bufPtr = 0;
 
     protected final int slotVol;
@@ -28,9 +28,9 @@ abstract class PostIO implements Closeable {
     protected PostIO(String term, int postPos, int zoneCode, boolean write) 
         throws IOException {
 
-        int partNO = PostPoses.getPartNO(postPos);
-        slotVol = PostPoses.getSlotVolume(partNO);
-        slotPos = 1L * PostPoses.getSlotNO(postPos) * slotVol;
+        int partNO = Postings.getPartNO(postPos);
+        slotVol = Postings.getSlotVolume(partNO);
+        slotPos = 1L * Postings.getSlotNO(postPos) * slotVol;
         zone = Zones.decode(zoneCode);
         this.term = term;
 
@@ -42,9 +42,9 @@ abstract class PostIO implements Closeable {
     }
 
     @Override public String toString() {
-        int partNO = 0, tmp = (slotVol-PostPoses.SIZE_LEN)/PostPoses.UNIT;
+        int partNO = 0, tmp = (slotVol-Postings.SIZE_LEN)/Postings.UNIT;
         while (tmp > 1) {
-            tmp /= PostPoses.RADIX;
+            tmp /= Postings.RADIX;
             partNO++;
         }
         return "[PostIO] "+partNO+"."+zone+" @ "+slotPos;
@@ -88,7 +88,7 @@ abstract class PostIO implements Closeable {
         } catch (EOFException e) {
             rf.seek(slotPos+slotVol-1);	/* allocate space */
             rf.writeByte(0);
-            writeSlotSize(PostPoses.SIZE_LEN);
+            writeSlotSize(Postings.SIZE_LEN);
         }
         bufPtr = maxPtr = 0;
     }

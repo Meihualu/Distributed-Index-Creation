@@ -27,7 +27,7 @@ class PostWriter extends PostIO {
             writer = new PostWriter(post.term, postPos, post.zoneCode);
             writers.add(writer);
             if (space+writer.getSlotSize() >= writer.slotVol) {
-                space += writer.getSlotSize()-PostPoses.SIZE_LEN;
+                space += writer.getSlotSize()-Postings.SIZE_LEN;
             } else {
                 space = -1;
                 break;
@@ -50,7 +50,7 @@ class PostWriter extends PostIO {
         } finally {
             for (PostWriter pw : writers) {
                 if (writer != pw) {
-                    pw.writeSlotSize(PostPoses.SIZE_LEN);
+                    pw.writeSlotSize(Postings.SIZE_LEN);
                     pw.close();
                 }
             }
@@ -67,7 +67,7 @@ class PostWriter extends PostIO {
         }
         heads[from.size()] = post;
         Merger merger = new Merger();
-        int space = PostPoses.SIZE_LEN;
+        int space = Postings.SIZE_LEN;
         while (true) {
             int i = -1;
             for (int j=0; j<heads.length; j++) {
@@ -104,11 +104,11 @@ class PostWriter extends PostIO {
         if (!file.exists()) {
             new FileOutputStream(fileName).close();
         }
-        if (0 != file.length()%PostPoses.getSlotVolume(partNO)) {
+        if (0 != file.length()%Postings.getSlotVolume(partNO)) {
             throw new RuntimeException("Invalid Inverted File");
         } else {
-            return PostPoses.encode(fileName, 
-                    (int)(file.length()/PostPoses.getSlotVolume(partNO)));
+            return Postings.encode(fileName, 
+                    (int)(file.length()/Postings.getSlotVolume(partNO)));
         }
     }
 

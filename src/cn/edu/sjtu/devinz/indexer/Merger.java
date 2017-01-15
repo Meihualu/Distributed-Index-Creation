@@ -78,9 +78,9 @@ class Merger {
                 dumper.getFileOutputStream().write(buffer);
                 len = 0;
             }
-            num = Math.min(PostPoses.BLOCK, bytes.length-i);
-            if (0 < len%PostPoses.BLOCK) {
-                num = Math.min(PostPoses.BLOCK*(len/PostPoses.BLOCK+1)-len, num);
+            num = Math.min(Postings.BLOCK, bytes.length-i);
+            if (0 < len%Postings.BLOCK) {
+                num = Math.min(Postings.BLOCK*(len/Postings.BLOCK+1)-len, num);
             }
             System.arraycopy(bytes, i, buffer, len, num);
             len += num;
@@ -91,7 +91,7 @@ class Merger {
 
     public synchronized byte[] nextBlock() throws IOException {
         if (null != dumper) {
-            byte[] bytes = new byte[PostPoses.BLOCK];
+            byte[] bytes = new byte[Postings.BLOCK];
 
             if (dumper.getFileInputStream().read(bytes) == bytes.length) {
                 return bytes;
@@ -100,7 +100,7 @@ class Merger {
                 dumper = null;
             }
         }
-        byte[] bytes = new byte[Math.min(PostPoses.BLOCK, len-pos)];
+        byte[] bytes = new byte[Math.min(Postings.BLOCK, len-pos)];
 
         System.arraycopy(buffer, pos, bytes, 0, bytes.length);
         pos += bytes.length;

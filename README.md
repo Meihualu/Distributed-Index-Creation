@@ -4,59 +4,15 @@ A Distributed Inverted Index Creation Module for an academic text search engine,
 which adopts the idea of [Geometrical Partitioning by Lester et al.](http://dl.acm.org/citation.cfm?id=1099739) 
 and takes advantage of _Apache Hadoop_, _Apache HBase_ and _Redis_.
 
+## Big Picture
 
-## Contents
+Index creation in the engineering of a text search engine:
 
-	.
-	├── bin
-	├── data
-	│   └── stats.out
-	├── doc
-	│   ├── doc_meta.md
-	│   ├── inv_files.md
-	│   ├── mapred.log
-	│   ├── my_thesis.pdf
-	│   ├── query_test.md
-	│   ├── search_engine_db.gliffy
-	│   ├── search_engine_db.jpg
-	│   ├── slot_sizes.png
-	│   └── term_dict.md
-	├── lib  (myriad *.jar files from HBase and Jedis packages)
-	├── README.md
-	├── scripts
-	│   └── stat.py
-	└── src
-		├── cn
-		│   └── edu
-		│       └── sjtu
-		│           └── devinz
-		│               ├── indexer
-		│               │   ├── DocInfo.java
-		│               │   ├── DocMeta.java
-		│               │   ├── Indexer.java
-		│               │   ├── Local.java
-		│               │   ├── Merger.java
-		│               │   ├── Posting.java
-		│               │   ├── PostIO.java
-		│               │   ├── PostPoses.java
-		│               │   ├── PostReader.java
-		│               │   ├── PostWriter.java
-		│               │   ├── Statistics.java
-		│               │   ├── TermDict.java
-		│               │   ├── TermInfo.java
-		│               │   └── Zones.java
-		│               ├── mapred
-		│               │   ├── IndexBuilder.java
-		│               │   ├── IndexMapper.java
-		│               │   └── IndexReducer.java
-		│               └── searcher
-		│                   ├── DocResult.java
-		│                   ├── QueryCache.java
-		│                   ├── QueryInfo.java
-		│                   ├── SearchClient.java
-		│                   ├── Searcher.java
-		│                   └── SearchServer.java
-		└── log4j.properties
+![big_pic](doc/big_pic.jpg)
+
+Architecture of the index creation module:
+
+![arch](doc/architecture.jpg)
 
 (1) Package _cn.edu.sjtu.devinz.mapred_ launches a Hadoop MapReduce job to take in text analysis data and distribute them to multiple index servers.
 

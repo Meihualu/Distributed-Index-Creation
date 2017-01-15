@@ -11,5 +11,4 @@ data/
 *.classpath
 *.project
 *.properties
-*.xml
 commit.sh

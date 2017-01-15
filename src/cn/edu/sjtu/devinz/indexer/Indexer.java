@@ -11,6 +11,8 @@ import org.apache.commons.io.FileUtils;
 
 public class Indexer {
 
+	private Indexer() {}
+	
     public static void addPost(String term, String url, int zoneCode, 
             String[] poses, Set<String> terms) throws IOException {
 

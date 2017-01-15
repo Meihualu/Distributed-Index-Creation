@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 public class Zones {
 
+	private Zones() {}
+	
     private static final String[] zones = {
         "title",
         "author",

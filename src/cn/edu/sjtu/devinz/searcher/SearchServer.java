@@ -16,6 +16,8 @@ import cn.edu.sjtu.devinz.indexer.Zones;
 
 class SearchServer {
 
+	private SearchServer() {}
+	
     public static final int PORT_NO = 10086;
 
     private static final Searcher searcher = new Searcher() {

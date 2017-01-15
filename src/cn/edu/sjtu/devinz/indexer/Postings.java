@@ -2,8 +2,10 @@ package cn.edu.sjtu.devinz.indexer;
 
 import java.util.StringTokenizer;
 
-class PostPoses {
-
+class Postings {
+	
+	private Postings() {}
+	
     /** PostPos = 5-bit partition # + 27-bit slot # */
 
     public static final int SIZE_LEN = 4;

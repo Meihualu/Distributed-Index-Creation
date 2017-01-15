@@ -28,7 +28,7 @@ public class Statistics {
                                 try {
                                     int slotSize = reader.getSlotSize();
 
-                                    totalSize += slotSize-PostPoses.SIZE_LEN;
+                                    totalSize += slotSize-Postings.SIZE_LEN;
                                 } finally {
                                     reader.close();
                                 }
