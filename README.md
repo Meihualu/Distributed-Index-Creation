@@ -2,6 +2,7 @@
 
 A Distributed Inverted Index Creation Module for an academic text search engine, 
 which adopts the idea of [Geometrical Partitioning by Lester et al.](http://dl.acm.org/citation.cfm?id=1099739) 
+(see [my demo](doc/partition.gif))
 and takes advantage of _Apache Hadoop_, _Apache HBase_ and _Redis_.
 
 ## Big Picture
@@ -10,7 +11,7 @@ Index creation in the engineering of a text search engine:
 
 ![big_pic](doc/big_pic.jpg)
 
-Architecture of the index creation module:
+The following picture exhibits the structure of this index creation module:
 
 ![arch](doc/architecture.jpg)
 
@@ -78,4 +79,5 @@ Also, more disk storage is allocated but turns out to be idle, which is the cost
 At least, some caching strategies should be exploited to improve the situation.
 
 (4) As regards phrase queries, skipping approach has not been supported by the current design, and shall be considered in the future.
+
 
